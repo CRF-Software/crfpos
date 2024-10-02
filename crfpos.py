@@ -1,9 +1,10 @@
 import streamlit as st
 from datetime import datetime
 from streamlit_drawable_canvas import st_canvas
+import time
 
 # Set the page title and layout
-st.set_page_config(page_title="Bruckner Meals :)", layout="centered")
+st.set_page_config(page_title="Simple POS System", layout="centered")
 
 # CSS Styling for title and logo
 st.markdown("""
@@ -37,10 +38,16 @@ logo_url = "https://th.bing.com/th/id/R.534a3a010f905e2340131ca622c63e27?rik=3gN
 st.markdown(f'<img src="{logo_url}" class="logo">', unsafe_allow_html=True)
 
 # Display the main title and logo
-st.markdown('<div class="main-title">Bruckner Meals :)</div>', unsafe_allow_html=True)
+st.markdown('<div class="main-title">Simple POS System</div>', unsafe_allow_html=True)
 
-# Create a form for the Room Number and Quantity
+# Create a form for the First Name, Last Name, Room Number, and Quantity
 with st.form(key='pos_form'):
+    st.subheader("First Name")
+    first_name = st.text_input("Enter first name", placeholder="First name", max_chars=20)
+    
+    st.subheader("Last Name")
+    last_name = st.text_input("Enter last name", placeholder="Last name", max_chars=20)
+
     st.subheader("Room Number")
     room_number = st.text_input("Enter room number", placeholder="Room number", max_chars=5)
 
@@ -73,8 +80,15 @@ with st.form(key='pos_form'):
     submit_button = st.form_submit_button(label="Submit Order")
 
     if submit_button:
-        if room_number and quantity:
-            st.success(f"Room Number: {room_number}\nMeal Type: {meal_type}\nQuantity: {quantity}\nOrder Submitted Successfully!")
+        if first_name and last_name and room_number and quantity:
+            st.success(f"Order Submitted Successfully for {first_name} {last_name}!\nRoom Number: {room_number}\nMeal Type: {meal_type}\nQuantity: {quantity}")
+            
+            # Simulate a thank you page for 5 seconds
+            with st.spinner('Thank you for your order! Redirecting...'):
+                time.sleep(5)
+
+            # Reload the page to reset the form
+            st.experimental_rerun()
         else:
             st.error("Please fill in all required fields.")
 
