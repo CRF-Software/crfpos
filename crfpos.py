@@ -3,7 +3,7 @@ from datetime import datetime
 from streamlit_drawable_canvas import st_canvas
 
 # Set the page title and layout
-st.set_page_config(page_title="Simple POS System", layout="centered")
+st.set_page_config(page_title="Bruckner Meals :)", layout="centered")
 
 # Styling for the header
 st.markdown("""
@@ -26,7 +26,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Display the main title and logo
-st.markdown('<div class="main-title">Simple POS System</div>', unsafe_allow_html=True)
+st.markdown('<div class="main-title">Bruckner Meals :)</div>', unsafe_allow_html=True)
 
 # Create a form for the Room Number and Quantity
 with st.form(key='pos_form'):
