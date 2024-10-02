@@ -1,3 +1,4 @@
 streamlit
 streamlit-drawable-canvas
 datetime
+sqlite3
