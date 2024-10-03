@@ -53,45 +53,50 @@ def create_keyboard(keyboard_input):
         cols = key_row.columns(len(row))
         for i, key in enumerate(row):
             if key == "SPACE":
-                cols[i].button(" ", on_click=lambda: keyboard_input.append(" "))
+                if st.button(" ", key=f"space_{keyboard_input}"):
+                    keyboard_input.append(" ")
             elif key == "BACKSPACE":
-                cols[i].button("⌫", on_click=lambda: keyboard_input.pop() if keyboard_input else None)
+                if st.button("⌫", key=f"backspace_{keyboard_input}"):
+                    if keyboard_input:
+                        keyboard_input.pop()
             else:
-                cols[i].button(key, on_click=lambda k=key: keyboard_input.append(k))
+                if st.button(key, key=f"{key}_{keyboard_input}"):
+                    keyboard_input.append(key)
 
 # Store the keyboard input
 first_name_input = []
 last_name_input = []
 room_number_input = []
 
-# Create a form for the First Name, Last Name, Room Number, and Quantity
+# Non-form keyboard inputs for First Name, Last Name, and Room Number
+st.subheader("First Name")
+create_keyboard(first_name_input)
+first_name = ''.join(first_name_input)
+st.write(f"Typed First Name: {first_name}")
+
+st.subheader("Last Name")
+create_keyboard(last_name_input)
+last_name = ''.join(last_name_input)
+st.write(f"Typed Last Name: {last_name}")
+
+st.subheader("Room Number")
+create_keyboard(room_number_input)
+room_number = ''.join(room_number_input)
+st.write(f"Typed Room Number: {room_number}")
+
+# Automatically select Breakfast, Lunch, or Dinner based on the time of day
+current_hour = datetime.now().hour
+if current_hour < 11:
+    meal_type = "Breakfast"
+elif current_hour < 17:
+    meal_type = "Lunch"
+else:
+    meal_type = "Dinner"
+
+st.subheader(f"Meal Type (Auto-selected): {meal_type}")
+
+# Create a form for Quantity and Submit button
 with st.form(key='pos_form'):
-    st.subheader("First Name")
-    create_keyboard(first_name_input)
-    first_name = ''.join(first_name_input)
-    st.write(f"Typed First Name: {first_name}")
-
-    st.subheader("Last Name")
-    create_keyboard(last_name_input)
-    last_name = ''.join(last_name_input)
-    st.write(f"Typed Last Name: {last_name}")
-
-    st.subheader("Room Number")
-    create_keyboard(room_number_input)
-    room_number = ''.join(room_number_input)
-    st.write(f"Typed Room Number: {room_number}")
-
-    # Automatically select Breakfast, Lunch, or Dinner based on the time of day
-    current_hour = datetime.now().hour
-    if current_hour < 11:
-        meal_type = "Breakfast"
-    elif current_hour < 17:
-        meal_type = "Lunch"
-    else:
-        meal_type = "Dinner"
-
-    st.subheader(f"Meal Type (Auto-selected): {meal_type}")
-
     st.subheader("Quantity")
     quantity = st.number_input("Enter quantity", min_value=1, max_value=10)
 
