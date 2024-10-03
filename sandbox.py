@@ -1,75 +1,86 @@
 import streamlit as st
 from datetime import datetime
-from streamlit_drawable_canvas import st_canvas
-import sqlite3
-
-# Set up database connection
-def init_db():
-    conn = sqlite3.connect('bruckner.db')
-    cursor = conn.cursor()
-    
-    # Create table if it doesn't exist
-    cursor.execute('''CREATE TABLE IF NOT EXISTS orders (
-                        id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        room_number TEXT,
-                        meal_type TEXT,
-                        quantity INTEGER,
-                        timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
-                      )''')
-    conn.commit()
-    return conn, cursor
-
-# Insert data into the database
-def insert_order(room_number, meal_type, quantity):
-    conn, cursor = init_db()
-    cursor.execute('''INSERT INTO orders (room_number, meal_type, quantity)
-                      VALUES (?, ?, ?)''', (room_number, meal_type, quantity))
-    conn.commit()
-    conn.close()
+import time
 
 # Set the page title and layout
-st.set_page_config(page_title="CRF POS System with On-Screen Keyboard", layout="centered")
+st.set_page_config(page_title="Bruckner Meals :)", layout="centered")
 
-# HTML & JavaScript for on-screen keyboard
-keyboard_html = """
-    <input id="roomNumberInput" name="room_number" type="text" onfocus="showKeyboard()" placeholder="Enter room number" style="width: 100%; padding: 10px; font-size: 16px;">
-    <div id="keyboard" style="display:none; padding-top: 20px;">
-        <div>
-            <button onclick="typeCharacter('1')">1</button>
-            <button onclick="typeCharacter('2')">2</button>
-            <button onclick="typeCharacter('3')">3</button>
-            <button onclick="typeCharacter('4')">4</button>
-            <button onclick="typeCharacter('5')">5</button>
-            <button onclick="typeCharacter('6')">6</button>
-            <button onclick="typeCharacter('7')">7</button>
-            <button onclick="typeCharacter('8')">8</button>
-            <button onclick="typeCharacter('9')">9</button>
-            <button onclick="typeCharacter('0')">0</button>
-            <button onclick="clearInput()">Clear</button>
-        </div>
-    </div>
-    <script>
-        function showKeyboard() {
-            document.getElementById('keyboard').style.display = 'block';
-        }
-        
-        function typeCharacter(char) {
-            var inputField = document.getElementById('roomNumberInput');
-            inputField.value += char;
-        }
+# CSS Styling for title and logo
+st.markdown("""
+    <style>
+    .main-title {
+        font-size: 40px;
+        font-weight: bold;
+        text-align: center;
+        color: #000000;
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+    .logo {
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        width: 300px;
+        padding-bottom: 20px;
+    }
+    .sub-title {
+        font-size: 22px;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 10px;
+    }
+    </style>
+""", unsafe_allow_html=True)
 
-        function clearInput() {
-            document.getElementById('roomNumberInput').value = '';
-        }
-    </script>
-"""
+# Display the image in the header
+logo_url = "https://th.bing.com/th/id/R.534a3a010f905e2340131ca622c63e27?rik=3gNqUzH%2bfZvtfw&pid=ImgRaw&r=0"
+st.markdown(f'<img src="{logo_url}" class="logo">', unsafe_allow_html=True)
 
-# Display the keyboard section using Streamlit's `components.html`
-st.markdown("### Room Number Input (with On-Screen Keyboard)")
-st.components.v1.html(keyboard_html, height=300)
+# Display the main title and logo
+st.markdown('<div class="main-title">Bruckner Meals :)</div>', unsafe_allow_html=True)
 
-# Create the rest of the form for meal type and quantity
+# Function to create an on-screen keyboard
+def create_keyboard(keyboard_input):
+    keys = [
+        ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
+        ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'],
+        ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l'],
+        ['z', 'x', 'c', 'v', 'b', 'n', 'm', 'SPACE', 'BACKSPACE']
+    ]
+
+    for row in keys:
+        key_row = st.container()
+        cols = key_row.columns(len(row))
+        for i, key in enumerate(row):
+            if key == "SPACE":
+                cols[i].button(" ", on_click=lambda: keyboard_input.append(" "))
+            elif key == "BACKSPACE":
+                cols[i].button("⌫", on_click=lambda: keyboard_input.pop() if keyboard_input else None)
+            else:
+                cols[i].button(key, on_click=lambda k=key: keyboard_input.append(k))
+
+# Store the keyboard input
+first_name_input = []
+last_name_input = []
+room_number_input = []
+
+# Create a form for the First Name, Last Name, Room Number, and Quantity
 with st.form(key='pos_form'):
+    st.subheader("First Name")
+    create_keyboard(first_name_input)
+    first_name = ''.join(first_name_input)
+    st.write(f"Typed First Name: {first_name}")
+
+    st.subheader("Last Name")
+    create_keyboard(last_name_input)
+    last_name = ''.join(last_name_input)
+    st.write(f"Typed Last Name: {last_name}")
+
+    st.subheader("Room Number")
+    create_keyboard(room_number_input)
+    room_number = ''.join(room_number_input)
+    st.write(f"Typed Room Number: {room_number}")
+
     # Automatically select Breakfast, Lunch, or Dinner based on the time of day
     current_hour = datetime.now().hour
     if current_hour < 11:
@@ -88,10 +99,14 @@ with st.form(key='pos_form'):
     submit_button = st.form_submit_button(label="Submit Order")
 
     if submit_button:
-        room_number = st.session_state.get('room_number', None)
-        if room_number and quantity:
-            # Insert the order into the SQLite database
-            insert_order(room_number, meal_type, quantity)
-            st.success(f"Order Submitted Successfully!\nRoom Number: {room_number}\nMeal Type: {meal_type}\nQuantity: {quantity}")
+        if first_name and last_name and room_number and quantity:
+            st.success(f"Order Submitted Successfully for {first_name} {last_name}!\nRoom Number: {room_number}\nMeal Type: {meal_type}\nQuantity: {quantity}")
+            
+            # Simulate a thank you page for 5 seconds
+            with st.spinner('Thank you for your order! Redirecting...'):
+                time.sleep(5)
+
+            # Reload the page to reset the form
+            st.experimental_rerun()
         else:
             st.error("Please fill in all required fields.")
